@@ -1,14 +1,23 @@
 package org.bitbucket.dyatlov.crawler;
 
-import java.io.IOException;
-import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Created by Dyatlov on 12/06/2014.
+ * Created by dyatlov on 12.06.14.
  */
-public class LinkParser extends Parser {
-    @Override
-    public String nextToken(Reader reader) throws IOException {
-        reader.
+public class LinkParser {
+    static final Pattern LINK_PATTERN = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
+
+    public Collection<String> parse(CharSequence sequence) {
+        Matcher matcher = LINK_PATTERN.matcher(sequence);
+        ArrayList<String> result = new ArrayList<String>();
+        while (matcher.find()) {
+            String link = matcher.group(1);
+            result.add(link.substring(1, link.length()-1));
+        }
+        return result;
     }
 }
