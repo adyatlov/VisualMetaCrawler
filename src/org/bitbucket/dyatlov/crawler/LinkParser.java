@@ -1,5 +1,7 @@
 package org.bitbucket.dyatlov.crawler;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Matcher;
@@ -10,13 +12,22 @@ import java.util.regex.Pattern;
  */
 public class LinkParser {
     static final Pattern LINK_PATTERN = Pattern.compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))");
-
+    private URL baseURL;
     public Collection<String> parse(CharSequence sequence) {
         Matcher matcher = LINK_PATTERN.matcher(sequence);
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> links = new ArrayList<String>();
         while (matcher.find()) {
             String link = matcher.group(1);
-            result.add(link.replaceAll("\"|'", ""));
+            link = link.replaceAll("\"|'", "");
+            // Try to make URL
+            URL url;
+            try {
+                url = new URL(baseURL, link);
+            } catch (MalformedURLException e) {
+                // Consider link as relative
+                url = new URL();
+            }
+            links.add(link);
         }
         return result;
     }
