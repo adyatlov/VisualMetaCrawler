@@ -16,7 +16,7 @@ public class LinkParser {
         ArrayList<String> result = new ArrayList<String>();
         while (matcher.find()) {
             String link = matcher.group(1);
-            result.add(link.substring(1, link.length()-1));
+            result.add(link.replaceAll("\"|'", ""));
         }
         return result;
     }
