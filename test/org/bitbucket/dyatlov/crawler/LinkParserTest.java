@@ -84,7 +84,6 @@ public class LinkParserTest {
         Object[][] inputArr = data();
         StringBuilder input = new StringBuilder();
         for (Object[] obj: inputArr) {
-            input.append((String)obj[0]);
             input.append((String)obj[1]);
         }
         Set<String> links = parser.parse(new URL("http://example.com"), input, null);
