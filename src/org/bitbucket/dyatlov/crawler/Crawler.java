@@ -23,29 +23,29 @@ public class Crawler {
         return obtained.size() < maxToObtain;
     }
     public void crawl() {
-        while (!toProcess.isEmpty()) {
-            String url = toProcess.pop();
-            Fetcher fetcher = new Fetcher();
-            CharSequence html;
-            try {
-                html = fetcher.fetch(new URL(url));
-            } catch (Exception e) {
-                // Do nothing
-                continue;
-            }
-            LinkParser parser = new LinkParser();
-            Collection<String> links = parser.parse(html);
-            for (String link: links) {
-                URI uri;
-                try {
-                    uri = new URI(link);
-                } catch (URISyntaxException e) {
-                    // Do nothing
-                    continue;
-                }
-                // Check if URL
-
-            }
-        }
+//        while (!toProcess.isEmpty()) {
+//            String url = toProcess.pop();
+//            Fetcher fetcher = new Fetcher();
+//            CharSequence html;
+//            try {
+//                html = fetcher.fetch(new URL(url));
+//            } catch (Exception e) {
+//                // Do nothing
+//                continue;
+//            }
+//            LinkParser parser = new LinkParser();
+//            Collection<String> links = parser.parse(html);
+//            for (String link: links) {
+//                URI uri;
+//                try {
+//                    uri = new URI(link);
+//                } catch (URISyntaxException e) {
+//                    // Do nothing
+//                    continue;
+//                }
+//                // Check if URL
+//
+//            }
+//        }
     }
 }

@@ -30,7 +30,7 @@ public class Fetcher {
         StringBuilder stringBuilder = new StringBuilder();
         char[] buff = new char[8192];
         for (int len = reader.read(buff); len != -1; len = reader.read(buff)) {
-            stringBuilder.append(buff, 0, len );
+            stringBuilder.append(buff, 0, len);
         }
         return stringBuilder;
     }

@@ -10,7 +10,7 @@ public class FetcherTest {
     @Test
     public void testFetch() throws Exception {
         Fetcher fetcher = new Fetcher();
-        CharSequence sequence =  fetcher.fetch(new URL("http://google.com"));
-        assertTrue(sequence.toString().contains("google"));
+        CharSequence sequence =  fetcher.fetch(new URL("http://example.com"));
+        assertTrue(sequence.toString().contains("example"));
     }
 }
