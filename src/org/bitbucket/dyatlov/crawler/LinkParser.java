@@ -1,12 +1,9 @@
 package org.bitbucket.dyatlov.crawler;
 
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -1,10 +1,5 @@
 package org.bitbucket.dyatlov.crawler;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 

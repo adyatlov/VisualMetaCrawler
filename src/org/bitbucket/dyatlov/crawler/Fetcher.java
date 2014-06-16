@@ -2,7 +2,9 @@ package org.bitbucket.dyatlov.crawler;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 
