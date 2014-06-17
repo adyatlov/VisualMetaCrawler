@@ -29,7 +29,7 @@ public class Crawler {
 //                continue;
 //            }
 //            LinkParser parser = new LinkParser();
-//            Collection<String> links = parser.parse(html);
+//            Collection<String> links = parser.fetch(html);
 //            for (String link: links) {
 //                URI uri;
 //                try {

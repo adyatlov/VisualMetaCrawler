@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
 
 
 
-public class LinkParserTest {
+public class LinkFetcherTest {
 
     @DataProvider
     public String[][] data() {
@@ -63,28 +63,28 @@ public class LinkParserTest {
 
     @Test(dataProvider = "normalizeData")
     public void testNormalizeUrl(String input, String expected) throws Exception {
-        LinkParser parser = new LinkParser();
+        PageParser parser = new PageParser();
         URL url = parser.normalizeURL(new URL(input), null);
         assertEquals(url.toString(), expected);
     }
 
     @Test(dataProvider = "data")
     public void testParseSingle(String baseUrl, String input, String expected) throws Exception {
-        LinkParser parser = new LinkParser();
-        Set<String> links = parser.parse(new URL(baseUrl), input, null);
+        PageParser parser = new PageParser();
+        Set<String> links = parser.fetch(new URL(baseUrl), input, null);
         assertEquals(links.size(), 1);
         assertEquals(links.iterator().next(), expected);
     }
 
     @Test
     public void testParseMultiple() throws Exception {
-        LinkParser parser = new LinkParser();
+        PageParser parser = new PageParser();
         Object[][] inputArr = data();
         StringBuilder input = new StringBuilder();
         for (Object[] obj: inputArr) {
             input.append((String)obj[1]);
         }
-        Set<String> links = parser.parse(new URL("http://example.com"), input, null);
+        Set<String> links = parser.fetch(new URL("http://example.com"), input, null);
         System.out.println(Arrays.toString(links.toArray()));
         Set<String> expected = new HashSet<>();
         expected.add("http://example.com");

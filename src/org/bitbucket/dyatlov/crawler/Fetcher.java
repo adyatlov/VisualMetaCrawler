@@ -23,7 +23,7 @@ public class Fetcher {
             }
             mimeType = new MimeType(contentType);
         } catch (MimeTypeParseException e) {
-            throw new UnsupportedContentTypeException("Cannot parse mime type string");
+            throw new UnsupportedContentTypeException("Cannot fetch mime type string");
         }
         if (!"text".equalsIgnoreCase(mimeType.getPrimaryType())) {
             throw new UnsupportedContentTypeException("Mime type " + mimeType.toString() + " is not supported");
