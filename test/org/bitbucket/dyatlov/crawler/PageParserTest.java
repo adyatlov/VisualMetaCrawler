@@ -3,6 +3,7 @@ package org.bitbucket.dyatlov.crawler;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import static org.testng.Assert.assertEquals;
 
 
 
-public class LinkFetcherTest {
+public class PageParserTest {
 
     @DataProvider
     public String[][] data() {
@@ -71,9 +72,9 @@ public class LinkFetcherTest {
     @Test(dataProvider = "data")
     public void testParseSingle(String baseUrl, String input, String expected) throws Exception {
         PageParser parser = new PageParser();
-        Set<String> links = parser.fetch(new URL(baseUrl), input, null);
-        assertEquals(links.size(), 1);
-        assertEquals(links.iterator().next(), expected);
+        PageInfo pageInfo = parser.parse(new URL(baseUrl), new StringReader(input), null);
+        assertEquals(pageInfo.getLinks().size(), 1);
+        assertEquals(pageInfo.getLinks().iterator().next(), expected);
     }
 
     @Test
@@ -84,15 +85,15 @@ public class LinkFetcherTest {
         for (Object[] obj: inputArr) {
             input.append((String)obj[1]);
         }
-        Set<String> links = parser.fetch(new URL("http://example.com"), input, null);
-        System.out.println(Arrays.toString(links.toArray()));
+        PageInfo pageInfo = parser.parse(new URL("http://example.com"), new StringReader(input.toString()), null);
+        System.out.println(Arrays.toString(pageInfo.getLinks().toArray()));
         Set<String> expected = new HashSet<>();
         expected.add("http://example.com");
         expected.add("http://example.com/absolute%20path");
         expected.add("http://example.com/");
         expected.add("http://example.com/relative%20path");
         expected.add("http://wikipedia.org");
-        assertEquals(links, expected);
+        assertEquals(pageInfo.getLinks(), expected);
     }
 
 }

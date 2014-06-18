@@ -22,6 +22,9 @@ public class PageParser {
      * @return normalized URL or null if the normalization wasn't successful
      */
     public URL normalizeURL(URL url, String encoding) {
+        if (url == null) {
+            throw new IllegalArgumentException("url cannot be null");
+        }
         if (encoding == null || encoding.isEmpty()) {
             encoding = "UTF-8";
         }
@@ -48,22 +51,57 @@ public class PageParser {
     /**
      * Returns unique normalized URLs
      * @see PageParser#normalizeURL(java.net.URL, String) normalizeURL
-     * @param baseUrl URL of the document to fetch
+     * @param pageUrl URL of the document to fetch
+     * @param reader document reader
      * @param encoding original encoding of the document, UTF-8 if encoding == "" or null
      * @return PageInfo object containing information about the page
+     * @throws java.lang.IllegalArgumentException if reader or pageUrl are null
      */
-    public PageInfo parse(URL baseUrl, Reader reader, String encoding) throws IOException {
-        HashSet<String> links = new HashSet<>();
+    public PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
+        if (pageUrl == null || reader == null) {
+            throw new IllegalArgumentException("reader an pageUrl shouldn't be null");
+        }
         MyHTMLEditorKit kit = new MyHTMLEditorKit();
         HTMLEditorKit.Parser parser =  kit.getParser();
         PageInfoCallback pageInfoCallback = new PageInfoCallback();
         parser.parse(reader,pageInfoCallback, true);
-        //TODO(Dyatlov): Implement tomorrow
-        PageInfo pageInfo = new PageInfo();
-        return pageInfo;
+
+        HashSet<String> links = new HashSet<>(pageInfoCallback.getLinks().size());
+        // According to http://www.w3.org/TR/html51/document-metadata.html#the-base-element
+        // it is possible to have relative URL in href attribute of <base> tag.
+        URL baseUrl = makeAbsolute(pageUrl, pageInfoCallback.getBaseLink());
+        for (String link: pageInfoCallback.getLinks()) {
+            URL url =  makeAbsolute(baseUrl, link);
+            if (url != null) {
+                url = normalizeURL(url, encoding);
+            }
+            if (url != null) {
+                links.add(url.toString());
+            }
+            // TODO(Dyatlov): add statistics
+        }
+
+        return new PageInfo(pageUrl, pageInfoCallback.getTitle(), links);
+    }
+
+    private URL makeAbsolute(URL base, String link) {
+        if (base == null) {
+            throw new IllegalArgumentException("base URL shouldn't be null");
+        }
+        if (link == null) {
+            return base;
+        }
+        try {
+            return new URL(base, link);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 }
 
+// TODO(Dyatlov): Use some third-party parser in the production.
+// Using this swing parser is not a good idea in general.
+// It is here just because of the requirements which restrict to use anything outside of SDK.
 class PageInfoCallback extends HTMLEditorKit.ParserCallback {
     private static final HashSet<HTML.Tag> CONSIDERED_TAGS;
     static {
@@ -141,6 +179,8 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
     }
 }
 
+
+// Just a trick to obtain parser
 class MyHTMLEditorKit extends HTMLEditorKit {
     public HTMLEditorKit.Parser getParser() {
         return super.getParser();
