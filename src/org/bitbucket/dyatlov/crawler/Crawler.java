@@ -26,10 +26,13 @@ public class Crawler {
     }
 
     private void addObtainedUrl(String url) {
+        System.out.print(url);
         if (!obtained.add(url)) {
+            System.out.println(" already exists");
             return;
         }
         toProcess.addLast(url);
+        System.out.println(" added #" + obtained.size());
         return;
     }
 
@@ -40,7 +43,7 @@ public class Crawler {
             URL pageUrl;
             Reader reader;
             try {
-                pageUrl = PageParser.normalizeURL(new URL(url), null);
+                pageUrl = new URL(url);
                 reader = fetcher.fetch(pageUrl);
             } catch (Exception e) {
                 // Do nothing
@@ -54,11 +57,10 @@ public class Crawler {
                 continue;
             }
             for (String link: pageInfo.getLinks()) {
-                System.out.println(link + " " + obtained.size());
-                addObtainedUrl(link);
                 if (obtained.size() > maxToObtain) {
                     return;
                 }
+                addObtainedUrl(link);
             }
         }
     }
