@@ -21,7 +21,7 @@ public class PageParser {
      * @param encoding original encoding of the document, UTF-8 if encoding == "" or null
      * @return normalized URL or null if the normalization wasn't successful
      */
-    public URL normalizeURL(URL url, String encoding) {
+    public static URL normalizeURL(URL url, String encoding) {
         if (url == null) {
             throw new IllegalArgumentException("url cannot be null");
         }
@@ -57,7 +57,7 @@ public class PageParser {
      * @return PageInfo object containing information about the page
      * @throws java.lang.IllegalArgumentException if reader or pageUrl are null
      */
-    public PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
+    public static PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
         if (pageUrl == null || reader == null) {
             throw new IllegalArgumentException("reader an pageUrl shouldn't be null");
         }
@@ -84,7 +84,7 @@ public class PageParser {
         return new PageInfo(pageUrl, pageInfoCallback.getTitle(), links);
     }
 
-    private URL makeAbsolute(URL base, String link) {
+    private static URL makeAbsolute(URL base, String link) {
         if (base == null) {
             throw new IllegalArgumentException("base URL shouldn't be null");
         }
@@ -138,7 +138,10 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
     @Override
     public void handleText(char[] data, int pos) {
         if (inTitle) {
-            title = new String(data);
+            // Use only first <title> tag
+            if (title == null) {
+                title = new String(data);
+            }
         }
     }
 
@@ -162,7 +165,7 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
     private void handleBaseTag(HTML.Tag t, MutableAttributeSet a) {
         // Use only first <base> tag
         if (baseLink == null) {
-            title = (String) a.getAttribute(HTML.Attribute.HREF);
+            baseLink = (String) a.getAttribute(HTML.Attribute.HREF);
         }
     }
 
