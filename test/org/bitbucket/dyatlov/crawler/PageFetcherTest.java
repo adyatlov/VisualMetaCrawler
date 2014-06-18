@@ -6,11 +6,11 @@ import java.net.URL;
 import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
-public class FetcherTest {
+public class PageFetcherTest {
 
     @Test
     public void testFetch() throws Exception {
-        Fetcher fetcher = new Fetcher();
+        PageFetcher fetcher = new PageFetcher();
         Reader reader =  fetcher.fetch(new URL("http://example.com")).getReader();
 
         StringBuilder stringBuilder = new StringBuilder();

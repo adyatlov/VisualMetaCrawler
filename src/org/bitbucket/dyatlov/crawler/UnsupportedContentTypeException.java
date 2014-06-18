@@ -1,7 +1,7 @@
 package org.bitbucket.dyatlov.crawler;
 
 /**
- * Created by dyatlov on 12.06.14.
+ * Thrown when the content type of the web-document is not supported
  */
 public class UnsupportedContentTypeException extends Exception {
     public UnsupportedContentTypeException(String s) {

@@ -10,9 +10,16 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Created by Dyatlov on 12/06/2014.
+ * Obtains page content reader and encoding. Supports only text-based mime-types.
  */
-public class Fetcher {
+public class PageFetcher {
+    /**
+     * Returns content reader and encoding
+     * @param url ULR of the page
+     * @return page information and encoding pair
+     * @throws IOException when something went wrong with the connection of so
+     * @throws UnsupportedContentTypeException when the mime-types of the addressed document is not text-based .
+     */
     public Result fetch(URL url) throws IOException, UnsupportedContentTypeException {
         URLConnection connection = url.openConnection();
         connection.connect();
@@ -36,6 +43,9 @@ public class Fetcher {
         return new Result(new BufferedReader(new InputStreamReader(connection.getInputStream())), encoding);
     }
 
+    /**
+     * Simple container for which contains page content reader and page encoding
+     */
     public static class Result {
         private Reader reader;
         private String encoding;

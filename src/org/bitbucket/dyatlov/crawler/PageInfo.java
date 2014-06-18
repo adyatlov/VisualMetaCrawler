@@ -5,13 +5,21 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * Created by dyatlov on 17.06.14.
+ * Page information container
+ * TODO(Dyatlov) might be extended with key-words and lists of pages which refer this page
  */
 public class PageInfo {
     private URL pageUrl;
     private String pageTitle;
     private Set<String> links;
 
+    /**
+     * Constructs PageInfo class
+     *
+     * @param pageUrl   URL of the page
+     * @param pageTitle title of the page (tag <title>)
+     * @param links     a set of absolute URLs on the page
+     */
     public PageInfo(URL pageUrl, String pageTitle, Set<String> links) {
         if (pageUrl == null) {
             throw new IllegalArgumentException("pageUrl shouldn't be null");
