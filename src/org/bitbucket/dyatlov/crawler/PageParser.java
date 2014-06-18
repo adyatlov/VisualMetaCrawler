@@ -5,7 +5,6 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.*;
 
@@ -15,49 +14,15 @@ import java.util.*;
 public class PageParser {
 
     /**
-     * Tries to convert URL to a normalize (unify) format cutting
-     * its fragment part and properly encode path and query parts.
-     * @param url URL to convert
-     * @param encoding original encoding of the document, UTF-8 if encoding == "" or null
-     * @return normalized URL or null if the normalization wasn't successful
-     */
-    public static URL normalizeURL(URL url, String encoding) {
-        if (url == null) {
-            throw new IllegalArgumentException("url cannot be null");
-        }
-        if (encoding == null || encoding.isEmpty()) {
-            encoding = "UTF-8";
-        }
-        try {
-            // Removing the default port
-            int port = url.getPort();
-            if (port == url.getDefaultPort()) {
-                port = -1;
-            }
-
-            URI uri = new URI(url.getProtocol(),
-                    null /*userInfo*/,
-                    url.getHost().toLowerCase(),
-                    port,
-                    (url.getPath()  == null) ? null : URLDecoder.decode(url.getPath(), encoding),
-                    (url.getQuery() == null) ? null : URLDecoder.decode(url.getQuery(), encoding),
-                    null /*fragment*/);
-            return uri.toURL();
-        } catch (UnsupportedEncodingException | MalformedURLException | URISyntaxException e) {
-            return null;
-        }
-    }
-
-    /**
      * Returns unique normalized URLs
-     * @see PageParser#normalizeURL(java.net.URL, String) normalizeURL
+     * @see UrlNormalizer#normalizeURL(java.net.URL, String) normalizeURL
      * @param pageUrl URL of the document to fetch
      * @param reader document reader
      * @param encoding original encoding of the document, UTF-8 if encoding == "" or null
      * @return PageInfo object containing information about the page
      * @throws java.lang.IllegalArgumentException if reader or pageUrl are null
      */
-    public static PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
+    public PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
         if (pageUrl == null || reader == null) {
             throw new IllegalArgumentException("reader an pageUrl shouldn't be null");
         }
@@ -72,8 +37,12 @@ public class PageParser {
         URL baseUrl = makeAbsolute(pageUrl, pageInfoCallback.getBaseLink());
         for (String link: pageInfoCallback.getLinks()) {
             URL url =  makeAbsolute(baseUrl, link);
+            // Collect only http links
             if (url != null) {
-                url = normalizeURL(url, encoding);
+                if (!url.getProtocol().equals("http") && !url.getProtocol().equals("https")) {
+                    continue;
+                }
+                url = UrlNormalizer.normalizeURL(url, encoding);
             }
             if (url != null) {
                 links.add(url.toString());
@@ -100,7 +69,7 @@ public class PageParser {
 }
 
 // TODO(Dyatlov): Use some third-party parser in the production.
-// Using this swing parser is not a good idea in general.
+// Using this swing parser is not a good idea in general as it's old and can produce stack overflow.
 // It is here just because of the requirements which restrict to use anything outside of SDK.
 class PageInfoCallback extends HTMLEditorKit.ParserCallback {
     private static final HashSet<HTML.Tag> CONSIDERED_TAGS;

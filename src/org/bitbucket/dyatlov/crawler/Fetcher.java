@@ -13,9 +13,13 @@ import java.net.URLConnection;
  * Created by Dyatlov on 12/06/2014.
  */
 public class Fetcher {
-    public Reader fetch(URL url) throws IOException, UnsupportedContentTypeException {
+    public Result fetch(URL url) throws IOException, UnsupportedContentTypeException {
         URLConnection connection = url.openConnection();
         connection.connect();
+        String encoding = connection.getContentEncoding();
+        if (encoding == null || encoding.isEmpty()) {
+            encoding = "UTF-8";
+        }
         MimeType mimeType;
         try {
             String contentType = connection.getContentType();
@@ -29,6 +33,24 @@ public class Fetcher {
         if (!"text".equalsIgnoreCase(mimeType.getPrimaryType())) {
             throw new UnsupportedContentTypeException("Mime type " + mimeType.toString() + " is not supported");
         }
-        return new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        return new Result(new BufferedReader(new InputStreamReader(connection.getInputStream())), encoding);
+    }
+
+    public static class Result {
+        private Reader reader;
+        private String encoding;
+
+        public Result(Reader reader, String encoding) {
+            this.reader = reader;
+            this.encoding = encoding;
+        }
+
+        public Reader getReader() {
+            return reader;
+        }
+
+        public String getEncoding() {
+            return encoding;
+        }
     }
 }

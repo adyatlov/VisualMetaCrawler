@@ -11,7 +11,7 @@ public class FetcherTest {
     @Test
     public void testFetch() throws Exception {
         Fetcher fetcher = new Fetcher();
-        Reader reader =  fetcher.fetch(new URL("http://example.com"));
+        Reader reader =  fetcher.fetch(new URL("http://example.com")).getReader();
 
         StringBuilder stringBuilder = new StringBuilder();
         char[] buff = new char[8192];

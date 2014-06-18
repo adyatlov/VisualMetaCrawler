@@ -64,27 +64,28 @@ public class PageParserTest {
 
     @Test(dataProvider = "normalizeData")
     public void testNormalizeUrl(String input, String expected) throws Exception {
-        URL url = PageParser.normalizeURL(new URL(input), null);
+        URL url = UrlNormalizer.normalizeURL(new URL(input), null);
         assertEquals(url.toString(), expected);
     }
 
     @Test(dataProvider = "data")
     public void testParseSingle(String baseUrl, String input, String expected) throws Exception {
-        PageInfo pageInfo = PageParser.parse(new URL(baseUrl), new StringReader(input), null);
+        PageParser parser = new PageParser();
+        PageInfo pageInfo = parser.parse(new URL(baseUrl), new StringReader(input), null);
         assertEquals(pageInfo.getLinks().size(), 1);
         assertEquals(pageInfo.getLinks().iterator().next(), expected);
     }
 
     @Test
     public void testParseMultiple() throws Exception {
-        PageParser parser = new PageParser();
         Object[][] inputArr = data();
         StringBuilder input = new StringBuilder();
         input.append("<base href='http://example.com'>");
         for (Object[] obj: inputArr) {
             input.append((String)obj[1]);
         }
-        PageInfo pageInfo = PageParser.parse(new URL("http://example.com/path/"), new StringReader(input.toString()), null);
+        PageParser parser = new PageParser();
+        PageInfo pageInfo = parser.parse(new URL("http://example.com/path/"), new StringReader(input.toString()), null);
         System.out.println(Arrays.toString(pageInfo.getLinks().toArray()));
         Set<String> expected = new HashSet<>();
         expected.add("http://example.com");

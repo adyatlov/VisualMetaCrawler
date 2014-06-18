@@ -5,11 +5,14 @@ import java.net.URL;
 
 public class Main {
     public static void main(String[] args) {
+        Crawler crawler;
         try {
-            Crawler crawler = new Crawler(new URL("http://bruker.com"), 1000);
-            crawler.crawl();
+            crawler = new Crawler(new URL("http://scils.de"), 1000, new Fetcher(), new PageParser());
         } catch (MalformedURLException e) {
             e.printStackTrace();
+            System.exit(1);
+            return;
         }
+        crawler.crawl();
     }
 }

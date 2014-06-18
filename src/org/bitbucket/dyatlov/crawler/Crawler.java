@@ -14,44 +14,56 @@ public class Crawler {
     private HashSet<String> obtained = new HashSet<>();
     private Deque<String> toProcess =  new ArrayDeque<>();
     private final int maxToObtain;
+    private Fetcher fetcher;
+    private PageParser parser;
 
-    public Crawler(URL startUrl, int maxToObtain) {
+    public Crawler(URL startUrl, int maxToObtain, Fetcher fetcher, PageParser parser) {
+        if (startUrl == null) {
+            throw new IllegalArgumentException("startUrl shouldn't be null");
+        }
+        if (fetcher == null) {
+            throw new IllegalArgumentException("fetcher shouldn't be null");
+        }
+        if (parser == null) {
+            throw new IllegalArgumentException("parser shouldn't be null");
+        }
         URL originalStartUrl = startUrl;
-        startUrl = PageParser.normalizeURL(startUrl, null);
+        startUrl = UrlNormalizer.normalizeURL(startUrl, null);
         if (startUrl == null) {
             startUrl = originalStartUrl;
         }
-        addObtainedUrl(PageParser.normalizeURL(startUrl, null).toString());
+        addObtainedUrl(UrlNormalizer.normalizeURL(startUrl, "UTF-8").toString());
         this.maxToObtain = maxToObtain;
+        this.fetcher = fetcher;
+        this.parser = parser;
     }
 
     private void addObtainedUrl(String url) {
-        System.out.print(url);
         if (!obtained.add(url)) {
-            System.out.println(" already exists");
             return;
         }
         toProcess.addLast(url);
-        System.out.println(" added #" + obtained.size());
+        System.out.println(url + " #" + obtained.size());
         return;
     }
 
     public void crawl() {
         while (!toProcess.isEmpty()) {
             String url = toProcess.pollFirst();
-            Fetcher fetcher = new Fetcher();
             URL pageUrl;
             Reader reader;
+            Fetcher.Result result;
             try {
                 pageUrl = new URL(url);
-                reader = fetcher.fetch(pageUrl);
-            } catch (Exception e) {
+                result = fetcher.fetch(pageUrl);
+                reader = result.getReader();
+            } catch (IOException | UnsupportedContentTypeException e) {
                 // Do nothing
                 continue;
             }
             PageInfo pageInfo;
             try {
-                pageInfo = PageParser.parse(pageUrl, reader, null);
+                pageInfo = parser.parse(pageUrl, reader, result.getEncoding());
             } catch (IOException e) {
                 // Do nothing
                 continue;
