@@ -3,7 +3,10 @@ package org.bitbucket.dyatlov.crawler;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The Crawler. It crawls WEB starting with the single URL using PageFetcher and PageParser.
@@ -12,10 +15,10 @@ import java.util.*;
  */
 public class Crawler {
     private final int maxToObtain;
-    private HashMap<String, PageInfo> obtained = new HashMap<>();
-    private Deque<String> toProcess = new ArrayDeque<>();
-    private PageFetcher fetcher;
-    private PageParser parser;
+    private final Set<String> obtained = new HashSet<>();
+    private final Deque<String> toProcess = new ArrayDeque<>();
+    private final PageFetcher fetcher;
+    private final PageParser parser;
 
     /**
      * Constructs crawler
@@ -59,18 +62,21 @@ public class Crawler {
                 // Do nothing
                 continue;
             }
-            PageInfo pageInfo;
+
+            Set<String> links;
             try {
-                pageInfo = parser.parse(pageUrl, reader, result.getEncoding());
+                links = parser.parse(pageUrl, reader, result.getEncoding());
             } catch (IOException e) {
                 // Do nothing
                 continue;
             }
-            for (String link : pageInfo.getLinks()) {
-                if (obtained.size() > maxToObtain) {
+            for (String link : links) {
+                if (obtained.size() >= maxToObtain) {
                     return;
                 }
-                addObtainedUrl(link, pageInfo);
+                if (obtained.add(link)) {
+                    toProcess.addLast(link);
+                }
             }
         }
     }
@@ -78,16 +84,8 @@ public class Crawler {
     /**
      * @return obtained pages information
      */
-    public Collection<PageInfo> getPages() {
-        return obtained.values();
+    public Set<String> getLinks() {
+        return obtained;
     }
 
-    private void addObtainedUrl(String url, PageInfo pageInfo) {
-        if (obtained.put(url, pageInfo) != null) {
-            return;
-        }
-        toProcess.addLast(url);
-        System.out.println(url + " #" + obtained.size());
-        return;
-    }
 }

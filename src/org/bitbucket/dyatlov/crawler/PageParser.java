@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Parses page in order to obtain links, page title and other useful information
@@ -35,24 +36,24 @@ public class PageParser {
      * @param pageUrl  URL of the document to fetch
      * @param reader   document reader
      * @param encoding original encoding of the document, UTF-8 if encoding == "" or null
-     * @return PageInfo object containing information about the page
+     * @return absolute URL strings
      * @throws java.lang.IllegalArgumentException if reader or pageUrl are null
      * @see UrlNormalizer#normalizeURL(java.net.URL, String) normalizeURL
      */
-    public PageInfo parse(URL pageUrl, Reader reader, String encoding) throws IOException {
+    public Set<String> parse(URL pageUrl, Reader reader, String encoding) throws IOException {
         if (pageUrl == null || reader == null) {
             throw new IllegalArgumentException("reader an pageUrl shouldn't be null");
         }
         MyHTMLEditorKit kit = new MyHTMLEditorKit();
         HTMLEditorKit.Parser parser = kit.getParser();
-        PageInfoCallback pageInfoCallback = new PageInfoCallback();
-        parser.parse(reader, pageInfoCallback, true);
+        PageParserCallback callback = new PageParserCallback();
+        parser.parse(reader, callback, true);
 
-        HashSet<String> links = new HashSet<>(pageInfoCallback.getLinks().size());
+        HashSet<String> links = new HashSet<>(callback.getLinks().size());
         // According to http://www.w3.org/TR/html51/document-metadata.html#the-base-element
         // it is possible to have relative URL in href attribute of <base> tag.
-        URL baseUrl = makeAbsolute(pageUrl, pageInfoCallback.getBaseLink());
-        for (String link : pageInfoCallback.getLinks()) {
+        URL baseUrl = makeAbsolute(pageUrl, callback.getBaseLink());
+        for (String link : callback.getLinks()) {
             URL url = makeAbsolute(baseUrl, link);
             // Collect only http links
             if (url != null) {
@@ -67,27 +68,23 @@ public class PageParser {
             // TODO(Dyatlov): add statistics
         }
 
-        return new PageInfo(pageUrl, pageInfoCallback.getTitle(), links);
+        return links;
     }
 }
 
 // TODO(Dyatlov): Use some third-party parser in the production.
 // Using this swing parser is not a good idea in general as it's old and can produce stack overflow.
 // It is here just because of the requirements which restrict to use anything outside of SDK.
-class PageInfoCallback extends HTMLEditorKit.ParserCallback {
+class PageParserCallback extends HTMLEditorKit.ParserCallback {
     private static final HashSet<HTML.Tag> CONSIDERED_TAGS;
 
     static {
         CONSIDERED_TAGS = new HashSet<>();
         CONSIDERED_TAGS.add(HTML.Tag.BASE);
-        CONSIDERED_TAGS.add(HTML.Tag.TITLE);
         CONSIDERED_TAGS.add(HTML.Tag.A);
     }
-    // It supposed to be stack but we have to track only one element with text so far.
-    boolean inTitle = false;
     private String baseLink;
-    private String title;
-    private ArrayList<String> links = new ArrayList<>();
+    private final ArrayList<String> links = new ArrayList<>();
 
     @Override
     public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
@@ -100,27 +97,8 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
             if (link != null) {
                 links.add(link);
             }
-        } else if (t.equals(HTML.Tag.TITLE)) {
-            inTitle = true;
         } else if (t.equals(HTML.Tag.BASE)) {
-            handleBaseTag(t, a);
-        }
-    }
-
-    @Override
-    public void handleText(char[] data, int pos) {
-        if (inTitle) {
-            // Use only first <title> tag
-            if (title == null) {
-                title = new String(data);
-            }
-        }
-    }
-
-    @Override
-    public void handleEndTag(HTML.Tag t, int pos) {
-        if (t.equals(HTML.Tag.TITLE)) {
-            inTitle = false;
+            handleBaseTag(a);
         }
     }
 
@@ -130,11 +108,11 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
             return;
         }
         if (t.equals(HTML.Tag.BASE)) {
-            handleBaseTag(t, a);
+            handleBaseTag(a);
         }
     }
 
-    private void handleBaseTag(HTML.Tag t, MutableAttributeSet a) {
+    private void handleBaseTag(MutableAttributeSet a) {
         // Use only first <base> tag
         if (baseLink == null) {
             baseLink = (String) a.getAttribute(HTML.Attribute.HREF);
@@ -143,10 +121,6 @@ class PageInfoCallback extends HTMLEditorKit.ParserCallback {
 
     public String getBaseLink() {
         return baseLink;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public ArrayList<String> getLinks() {

@@ -1,14 +1,16 @@
 package org.bitbucket.dyatlov.crawler;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Simple Web Crawler");
         if (args.length < 3) {
+            System.out.println("Simple Web Crawler");
             System.out.println("Usage:");
             System.out.println("First argument: page URL e.g. http://example.com");
             System.out.println("Second argument: number of pages to obtain e.g. 1000");
@@ -34,7 +36,7 @@ public class Main {
         }
 
         // Create file
-        BufferedWriter writer = null;
+        BufferedWriter writer;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2]), "utf-8"));
         } catch (IOException ex) {
@@ -43,17 +45,14 @@ public class Main {
             return;
         }
 
+        // Crawl!
         Crawler crawler = new Crawler(url, max, new PageFetcher(), new PageParser());
         crawler.crawl();
 
-        Collection<PageInfo> pages = crawler.getPages();
-
         // Write results to the file
         try {
-            for (PageInfo page: pages) {
-                writer.write(page.getPageTitle());
-                writer.write(" , ");
-                writer.write(page.getPageUrl().toString());
+            for (String link: crawler.getLinks()) {
+                writer.write(link);
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -61,14 +60,10 @@ public class Main {
             System.exit(4);
             return;
         } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    System.out.println("Error occurred when closing the file: " + args[2]);
-                    System.exit(5);
-                    return;
-                }
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         System.exit(0);

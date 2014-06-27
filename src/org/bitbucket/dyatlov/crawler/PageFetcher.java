@@ -47,8 +47,8 @@ public class PageFetcher {
      * Simple container for which contains page content reader and page encoding
      */
     public static class Result {
-        private Reader reader;
-        private String encoding;
+        private final Reader reader;
+        private final String encoding;
 
         public Result(Reader reader, String encoding) {
             this.reader = reader;

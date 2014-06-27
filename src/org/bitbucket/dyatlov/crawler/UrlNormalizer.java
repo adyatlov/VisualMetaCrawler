@@ -4,12 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 
 /**
- * Created by Dyatlov on 18/06/2014.
+ * Normalizes URL
  */
 public class UrlNormalizer {
     /**
-     * Normalizes URL
-     * <p>
      * Converts the scheme and host to lower case
      * HTTP://www.Example.com/ to http://www.example.com/
      * <p>
